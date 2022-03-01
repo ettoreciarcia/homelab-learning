@@ -10,7 +10,7 @@ I hope that someone with a higher seniority than mine can give me advice on what
 - [What do i have available](#what-do-i-have-available)
 - [Monitoring](#monitoring)
 - [Architecture Overview](#test)
-- [External Access](#test)
+- [External Access](#external-access)
 - [Learning Material](#learning)
 - [Personal Project](#personal-project)
 
@@ -50,4 +50,23 @@ Maybe in the future I will buy a NAS :)
 <img src="img/HDD.jpg " alt="HDD" width="200"/>
 
 ## Monitoring
+
+Here you can find an architecture overview of my monitoring tool.
+
+<img src="img/monitoring.jpg " alt="HDD" width="500"/>
+
+What i use:
+- **Telegraf** to push logs and metrics to InfluxDB. This It is the agent that I have installed on the servers to be monitored.
+- **InfluxDB** to store logs and metrics. I installed it in a docker container. I mapped port 8086 on my Ubuntu Server tith port 8086 on docker container.
+I mapped volumes too.
+- **Grafana** to view metrics and logs in dashboard. Also for Grafana I preferred to use a docker container, this time mapping port 300 on Ubuntu Server with port 3000 on Docker Container
+
+Final Result:
+
+<img src="img/MonitoringDash2.jpg " alt="HDD" width="500"/>
+
+<img src="img/MonitoringDash1.jpg " alt="HDD" width="500"/>
+
+
+## External Access
 
