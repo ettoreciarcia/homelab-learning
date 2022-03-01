@@ -53,7 +53,7 @@ Maybe in the future I will buy a NAS :)
 
 Here you can find an architecture overview of my monitoring tool.
 
-<img src="img/monitoring.jpg " alt="ArchitectureMonitoring" width="500"/>
+<img src="img/Monitoring.jpg " alt="ArchitectureMonitoring" width="500"/>
 
 What i use:
 - **Telegraf** to push logs and metrics to InfluxDB. This It is the agent that I have installed on the servers to be monitored.
