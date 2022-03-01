@@ -11,6 +11,8 @@ I hope that someone with a higher seniority than mine can give me advice on what
 - [Monitoring](#monitoring)
 - [Architecture Overview](#test)
 - [External Access](#test)
+- [Learning Material](#learning)
+- [Personal Project](#personal-project)
 
 ## What do I have available
 
