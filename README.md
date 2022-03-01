@@ -53,7 +53,7 @@ Maybe in the future I will buy a NAS :)
 
 Here you can find an architecture overview of my monitoring tool.
 
-<img src="img/monitoring.jpg " alt="HDD" width="500"/>
+<img src="img/monitoring.jpg " alt="ArchitectureMonitoring" width="500"/>
 
 What i use:
 - **Telegraf** to push logs and metrics to InfluxDB. This It is the agent that I have installed on the servers to be monitored.
@@ -63,9 +63,9 @@ I mapped volumes too.
 
 Final Result:
 
-<img src="img/MonitoringDash2.jpg " alt="HDD" width="500"/>
+<img src="img/MonitoringDash2.jpg " alt="DashMonitoring1" width="500"/>
 
-<img src="img/MonitoringDash1.jpg " alt="HDD" width="500"/>
+<img src="img/MonitoringDash1.jpg " alt="DashMonitoring2" width="500"/>
 
 
 ## External Access
