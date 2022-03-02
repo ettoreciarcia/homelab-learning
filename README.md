@@ -67,6 +67,16 @@ Final Result:
 
 <img src="img/MonitoringDash1.jpg " alt="DashMonitoring2" width="500"/>
 
-
 ## External Access
 
+To access my homelab from Internet i create a VPN using OpenVPN. Also in this case it is a dockerized solution.
+This is a blue print of my architecture for external access:
+
+<img src="img/ExternalAccess.jpg " alt="DashMonitoring2" width="700"/>
+
+You know, public ip addresses (if you don't have an enterprise contract) are like Hoghwarts ladders, they like to change.
+To solve the problem I have configured a dynamic DNS, So if my public IP address changed as well, I would still refer to the same DDNS.
+
+I use this [docker image](https://hub.docker.com/r/kylemanna/openvpn/).
+
+Remember to map the traffic on your modem / router properly, otherwise you will not be able to reach the server running this docker image on the right port!
