@@ -7,8 +7,9 @@ La get deve far ritornare l'immagine
 Checklist:
 
 Capire che DB usare
-Funzione per randomizzare
+Funzione per randomizzare [x]
 Legare la randomizzazione all'immagine da ritornare
 Dockerizzare l'applicazione
 Servire il tutto tramite k3s sul raspberry Pi
 Trovare 10 memini di Boris e cominciare a metterle in public  [x]
+Loggare le richieste fatte in un file [x]
