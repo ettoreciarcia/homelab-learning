@@ -13,6 +13,7 @@ I hope that someone with a higher seniority than mine can give me advice on what
 - [External Access](#external-access)
 - [Learning Material](#learning)
 - [Personal Project](#personal-project)
+- [Kubernetes](#Kubernetes)
 
 ## What do I have available
 
@@ -24,7 +25,7 @@ I recently bought a second-hand Raspberry Pi (The prices of these toys have skyr
 It's a 4 GB RAM And it comes with a 32 SD card.
 OS: Raspbian for ARM 64
 
-<img src="img/Raspberry.jpg " alt="Raspberry" width="200"/>
+<img src="img/Raspberry.jpg " alt="Raspberry" width="600"/>
 
 Isn't it very tender?
 
@@ -36,7 +37,7 @@ This is an Asus P550C, third generation i5 and 4GB of RAM, 256 GB SSD.
 It will be useful for doing things that you can't **yet** do on an ARM architecture.
 OS: Ubuntu Desktop 21.10
 
-<img src="img/PC.jpg " alt="Asus P550C" width="300"/>
+<img src="img/PC.jpg " alt="Asus P550C" width="600"/>
 
 After 7 years it's still on track
 
@@ -47,13 +48,13 @@ After 7 years it's still on track
 An old 500 GB HDD, I'll use it to extend the raspberry storage.
 Maybe in the future I will buy a NAS :)
 
-<img src="img/HDD.jpg " alt="HDD" width="200"/>
+<img src="img/HDD.jpg " alt="HDD" width="500"/>
 
 ## Monitoring
 
 Here you can find an architecture overview of my monitoring tool.
 
-<img src="img/Monitoring.jpg " alt="ArchitectureMonitoring" width="500"/>
+<center><img src="img/Monitoring.jpg " alt="ArchitectureMonitoring" width="800"/></center>
 
 What i use:
 - **Telegraf** to push logs and metrics to InfluxDB. This It is the agent that I have installed on the servers to be monitored.
@@ -63,16 +64,16 @@ I mapped volumes too.
 
 Final Result:
 
-<img src="img/MonitoringDash2.jpg " alt="DashMonitoring1" width="500"/>
+<center><img src="img/MonitoringDash2.jpg " alt="DashMonitoring1" width="500"/></center>
 
-<img src="img/MonitoringDash1.jpg " alt="DashMonitoring2" width="500"/>
+<center><img src="img/MonitoringDash1.jpg " alt="DashMonitoring2" width="500"/></center>
 
 ## External Access
 
 To access my homelab from Internet i create a VPN using OpenVPN. Also in this case it is a dockerized solution.
 This is a blue print of my architecture for external access:
 
-<img src="img/ExternalAccess.jpg " alt="DashMonitoring2" width="700"/>
+<center><img src="img/ExternalAccess.jpg " alt="DashMonitoring2" width="700"/></center>
 
 You know, public ip addresses (if you don't have an enterprise contract) are like Hoghwarts ladders, they like to change.
 To solve the problem I have configured a dynamic DNS, So if my public IP address changed as well, I would still refer to the same DDNS.
@@ -80,3 +81,7 @@ To solve the problem I have configured a dynamic DNS, So if my public IP address
 I use this [docker image](https://hub.docker.com/r/kylemanna/openvpn/).
 
 Remember to map the traffic on your modem / router properly, otherwise you will not be able to reach the server running this docker image on the right port!
+
+## Kubernetes
+
+Here you will find a collection of Kubernetes resources

@@ -29,7 +29,7 @@ Here are the main commands:
 
 If the previous steps were successful, you should receive this output:
 
-<img src="../../img/term.jpg" alt="Raspberry" width="600"/>
+<img src="../../img/term.jpg" alt="terminal" width="600"/>
 
 ## Installing Kubernetes Dashboard
 
@@ -45,4 +45,7 @@ Now all that remains is a ```kubectl proxy &``` (& to run processs in background
 
 And at this link http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login you will find the login screen.
 
-Enter your token and welcome to the kubernetes dashboard!
+Enter your token and welcome to the kubernetes dashboard! Cool, right? 
+
+<img src="../../img/dashboard.jpg" alt="dashboard" width=""/>
+
