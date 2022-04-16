@@ -17,14 +17,14 @@ func helloHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "Hello!")
+	fmt.Fprintf(w, "Hello! This is the first version of my web application!")
 }
 
 func main() {
 	http.HandleFunc("/hello", helloHandler) // Update this line of code
 
-	fmt.Printf("Starting server at port 8081\n")
-	if err := http.ListenAndServe(":8081", nil); err != nil {
+	fmt.Printf("Starting server at port 4000\n")
+	if err := http.ListenAndServe(":4000", nil); err != nil {
 		log.Fatal(err)
 	}
 }
