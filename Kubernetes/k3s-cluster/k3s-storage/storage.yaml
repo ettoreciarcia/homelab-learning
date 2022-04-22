@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-storage
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: local-path-pvc
+  namespace: test-storage
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: local-path-test
+  namespace: test-storage
+spec:
+  containers:
+  - name: local-path-test
+    image: nginx:stable-alpine
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+    - name: local-path-pvc
+      mountPath: /data
+    ports:
+    - containerPort: 80
+  volumes:
+  - name: local-path-pvc
+    persistentVolumeClaim:
+      claimName: local-path-pvc
+
