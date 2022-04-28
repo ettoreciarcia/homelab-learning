@@ -1,0 +1,21 @@
+# Please edit the object below. Lines beginning with a '#' will be ignored,
+# and an empty file will abort the edit. If an error occurs while saving this file will be
+# reopened with the relevant failures.
+#
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: longhorn-system
+spec:
+  finalizers:
+
+
+kubectl get ns delete-me -o json | \
+  jq '.spec.finalizers=[]' | \
+  curl -X PUT http://localhost:8001/api/v1/namespaces/longhorn-system/finalize -H "Content-Type: application/json" --data @-
+
+
+# Cancelliamo a mano il finalizers e lo incolliamo in temp.json, poi lanciamo questo comando
+# Inseriamo il namespace come env con NAMESAPCE=[NAMESPACE_NAME]
+# kubectl get namespace $NAMESPACE -o json | jq '.spec = {"finalizers":[]}' >temp.json
+# curl -k -H "Content-Type: application/json" -X PUT --data-binary @temp.json 127.0.0.1:8001/api/v1/namespaces/$NAMESPACE/finalize
