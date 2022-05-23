@@ -1,11 +1,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 )
 
 // album represents data about a record album.
@@ -73,6 +77,37 @@ func home(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, paths)
 }
 
+func listBucket() {
+	endpoint := os.Getenv("MINIO_ENDPOINT")
+	accessKeyID := os.Getenv("MINIO_ACCESS_KEY")
+	secretAccessKey := os.Getenv("MINIO_SECRET_KEY")
+	useSSL := false
+
+	// Initialize minio client object.
+	minioClient, err := minio.New(endpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
+		Secure: useSSL,
+	})
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	log.Printf("%#v\n", minioClient) // minioClient is now setup
+
+	buckets, err := minioClient.ListBuckets(context.Background())
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	for _, bucket := range buckets {
+		fmt.Println(bucket)
+	}
+}
+
+// func testMinio(c *gin.Context) {
+// 	c.(http.StatusOK, listBucket)
+// }
+
 func main() {
 	router := gin.Default()
 	router.GET("/albums", getAlbums)
@@ -82,6 +117,7 @@ func main() {
 	router.GET("healthCheck", healthCheck)
 	router.GET("/", home)
 	router.POST("/helloPerson", helloPerson)
+	// router.GET("/testMinio", testMinio)
 	router.Run("0.0.0.0:8080")
 
 }
