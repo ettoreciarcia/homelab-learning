@@ -1,0 +1,18 @@
+  apiVersion: networking.k8s.io/v1
+  kind: Ingress
+  metadata:
+    name: example-test
+    namespace: ingress-nginx-2
+  spec:
+    ingressClassName: nginx-two
+    rules:
+      - host: www.example.com
+        http:
+          paths:
+            - pathType: Prefix
+              backend:
+                service:
+                  name: ingress-nginx-2-controller
+                  port:
+                    number: 80
+              path: /
