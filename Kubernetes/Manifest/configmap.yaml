@@ -1,0 +1,10 @@
+apiVersion: v1
+data:
+  key: value
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2022-08-09T14:38:42Z"
+  name: cm-option
+  namespace: default
+  resourceVersion: "43563"
+  uid: 048a6f97-052d-4988-85fd-c13dcf1f72f4
