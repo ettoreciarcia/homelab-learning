@@ -47,5 +47,5 @@ And at this link http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/se
 
 Enter your token and welcome to the kubernetes dashboard! Cool, right? 
 
-<img src="../../img/dashboard.jpg" alt="dashboard" width=""/>
+<img src="../../img/Dashboard.jpg" alt="dashboard" width=""/>
 
