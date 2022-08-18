@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: kubernetes-app
-        image: hecha00/kubernetes-app:2.0
+        image: hecha00/kubernetes-app:3.0
         ports:
         - containerPort: 3000
         readinessProbe:

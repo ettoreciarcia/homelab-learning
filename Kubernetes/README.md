@@ -292,6 +292,71 @@ ___
 
 ## 6 Networking
 
-### 6.1 Ingress e Ingress Controller
+Il networking è uno dei topic fondamentali in Kubernetes. Capire come funzionano i singoli componenti e come comuinicano tra loro permette di fare troubleshooting quando il cluster ha un comportamento che non abbiamo previsto.
 
-Un ingress è una regola che definisce come un servizio, presente all’interno di un cluster, possa essere reso disponibile all’esterno del cluster. Pensiamo ad esempio ad una serie di server web nginx che devono essere resi accessibili dalla rete internet. Un Ingress Controller è un proxy che intercetta le richieste verso il cluster e utilizzando le regole mappa ogni servizio in base alla URL o il nome del dominio nella richiesta.
+Kubernetes segue le seguenti regole di default:
+
+- Tutti i pods possonpo comunicare tra di loro senza utillizzare NAT
+- Tutti i nodi possono comunciare con tutti i pods senza NAT
+- L'IP che un pod vede associato a sè stesso è lo stesso IP con cui gli altri pod lo vedono
+
+Date queste regole di default, ci sono 4 problemi relativi al networking da risolvere:
+
+1. Container-to-Container Networking
+2. Pod-to-Pod Networking
+3. Pod-to-Service-Networking
+4. Internet-to-Service Networking
+
+### 6.1 Container-to-Container networking
+
+In Linux ogni processo comunica con un *network namespace stack* che fornisce uno stack di rete logico con le sue rotte, i suoi network device e le sue regole firewall. in sostanza un network namespace stack fornisce uno stack di rete nuovo di zecca per tutti i prcoessi all'interno di quel namesapce.
+
+Possiamo listare i network namesapce con ```ls /var/run/netns```
+
+Di default, Linux assegna ogni processo al *root network namespace* che fornisce l'accesso al mondo esterno 
+
+![RootNetworkNamespace](images-readme/RootNetworkNamespace.jpg)
+
+**Root Network Namespace**
+
+In termini di costrutti Docker, un pod rappresenta un gruppo di container Docker che condividono lo stesso network namesapce. I container all'interno di un pod hanno tutti lo stesso indirizzo IP e lo stesso "spazio porta" assegnati tramite lo stesso network namespace e possono raggiungersi tramite localhost poichè risiedono nello stesso network namespace. Possiamo creare un nuovo network namespace per ogni pod su una macchina virtuale
+
+![MultipleNS](images-readme/MultupleNS.jpg)
+
+Le applicazioni all'interno dello stesso pod hanno anche accesso a volumi condivisi che sono definiti come parte del pod nel manifest e sono disponibili per essere montati nel filesystem di ogni applicazione
+
+### 6.2 Pod-to-Pod Netowking
+
+In Kubernetes, ogni Pod ha il indirizzop IP reale e ogni Pod comunica con gli altri utilizzando questo indirizzo IP. Ma come fa Kubernetes a permettere a due pod presenti su nodi diversi di comunicare utilizzando i loro indirizzi IP?
+Cominciamo con il caso in cui due Pod risiedono sullo stesso nodo.
+
+Dal punto di vista del pod, esiste nel proprio Ethernet Namespace e ha il bisogno di comunicare con altri Ethernet Namespace sullo stesso nodo. Fortunatamente, i namespace possono essere collegati utilizzando un **Linux Virtual Ethrnet Device (Veth Pair)** che consinste in due interfacce virtuali che possono essere distribuite su namespace multipli. Per connettere i network namespace di due pod, possiamo assegnare un lato del veth pair alla root network namespace e l'altro ato ai network namespace dei pod. Ogni coppia di Veth funziona come se i due pod fossero fisicamente collegati da un cavo che consente al traffico di fluire tra i due Pod. Questa configurazione può essere replicata per tutti i pod che abbiamo sulla macchina
+
+
+Questa [guida](https://linuxhint.com/use-linux-network-namespace/) mostra come creare, configurare e collegare un network namesapce al nostro attuale network namespace tramite veth 
+La figura mostra le coppie di Veth che connettono ogni pod su una macchina virtuale al root network namespace
+![veth](images-readme/veth.jpg)
+
+**Life of a packet: Pod-to-pod (same Node)**
+
+Abbiamo quindi dei network namespaces che isolano ogni Pod al proprio networking stack, veth che connette ogni namesapace al root namespace e un bridge che connette insieme i namespace di ogni pod. Siamo finalmente pronti a mandare il traffico dal pod 1 al pod 2
+
+![TrafficPods](images-readme/pod-to-pod-same-node.gif)
+
+Il Pod1 manda un pacchetto al proprio Ethernet Device **eth0** che è disponibile come default device per il pod. PEr il Pod1, **eth0** è connesso tramite **veth0** al **root namespace**. Il Bridge **cbr0** è configurato con **veth0** come segmento di rete a esso collegato. una volta che il pacchetto ha raggiunto il bridge, il bridge risolve il corretto segmento di rete a cui mandare il pacchetto (**veth1**) tramite ARP protocol. Quando il pacchetto raggiunge **veth1** è inoltrato al network namespace del Pod2.
+Con questo flusso i pod comunicano soltanto con localhost e eth0 e il traffico è ruotato al pod corretto.
+
+Il modello di Netowrking di Kubernetes impone che due Pod devono potersi raggiungere grazie ai loro IP anche quando si trovano su nodi differenti. L'IP di un pod è quindi sempre visibile agli altri pod nella rete e ogni pod vede il proprio indirizzo IP esattamente come lo vedono gli altri Pod.
+
+**Life of a packet: Pod-to-pod (across Nodes)**
+
+Generalmente, ad ogni nodo del cluster viene assegnato un blocco CIDR che specifica gli indirizzi IP disponibili per i Pod in esecuzione su quel nodo. Una volta che il traffico destinato al blocco CIDR raggiunge il nodo, è responsabilità del nodo inoltrare il traffico al Pod corretto
+
+![TrafficPodsDifferentNodes](images-readme/pod-to-pod-different-nodes.gif)
+
+Il flusso comincia esattamente come nel caso in cui la comunicazione avvenisse tra due Pod dello stesso nodo.
+Il pacchetto viene inoltrato all' **eth0** del pod1 che è "accoppiata" con **veth0** nel root namespace.
+Qui le cose cambiano, in quanto ARP fallirà nella risoluzione del segmento di rete a cui inviare il pacchetto quindi il pacchetto si ferma al bridge, non avendo disponibili indirizzi MAC corretti a cui inoltrarlo,
+Al fallimento, il bridge manderò il pacchetto alla **default route (quella del root namespace eth0**). A questo punto il pacchetto lascia il nodo ed entra nella rete.
+Assumiamo per il momento che la rete possa ruotare il pacchetto al nodo corretto basandosi sul CIDR block assegnato al nodo. 
+A questo punto il pacchetto entra nel root namespace del **secondo nodo** tramite **eth0**. Finalmente pla rotta viene completata attraverso il corretto **veth** che risiede nel namespace corretto. Una volta raggiunto il nodo, generalmente è il nodo stesso che provvede ad ioltrarlo al pod correto

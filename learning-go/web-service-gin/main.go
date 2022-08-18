@@ -73,6 +73,10 @@ func helloPerson(c *gin.Context) {
 	c.String(http.StatusOK, "Hello %s", firstname)
 }
 
+func testPost(c *gin.Context) {
+	body = c.Defa
+}
+
 func home(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, paths)
 }
