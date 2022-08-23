@@ -61,15 +61,58 @@ I container condividono il kernel del sistema operativo e utilizzano una frazion
 
 ___
 
-## 2. Installazione
+## 2. Sfumature di Kubernetes
 
 Per gli esercizi in questa guida ho utilizzato **K3s** installato su un RaspberryPi 4, ma ci sono altre alternative.
 
-**Minikube**: Kubernetes in macchina virtuale
-**Kind**: Kubernetes in Docker container
-**MicroK8s**
-**EKS/GKE/AKS**: cluster K8s gestiti da Cloud Provider
+- **Minikube**: è un progetto di Kubernetes e crea una macchina virtuale come nodo singolo di K8S. Necessita quindi di un Hypervisor. Per chi comincia, questo tool è un must. In pochi minuti si ha il cluster up e si è pronti a lavorare utilizzando kubectl
 
+- **Kind**: anche questo è un progetto Kubernetes ma a differenza di Minikube sposta il nodo all'interno di un container Docker. Questo significa che è sensibilmente più veloce rispetto a Minikube. Kind prevede anche un flag per creare più istanze Docker con Kubernetes in parallelo.
+Permette anche di caricare le immagini direttamente nel cluster from local
+
+- **K3s**: è una versione più leggera di Kubernetes sviluppata da Rancher Labs. Si divide in K3s Server e Agent.È particolarmente performante su dispositivi ARM
+
+|   | Minikube  | Kind   | K3s  |
+|---|---|---|---|
+| runtime  | VM  | container   |  native |
+|  supported architectures |  AMD64 |  AMD64 | AMD64, ARMv7, ARM64  |
+| supported container runtime  | Docker,CRI-O,containerd,gvisor  |  Docker |  Docker, containerd |
+|  start up time |  5:19 / 3:15 |  2:48 / 1:06 |   	0:15 / 0:15 |
+| memory Requirements  |  2GB | 8GB (Windows, MacOS)  |  512 MB |
+| Requires root?  |  no  | no  |  yes |
+| Multi Cluster Support | yes  | yes  | no  |
+| Multi Node support  | no  | no  | yes  |
+
+### Short description
+
+I chose to install k3s due to the light weight and its excellent performance on an ARM processor.
+At the beginning my architecture was nothing more than a cluster with a single node, then I added another node.
+
+In the current configuration my cluster has one node based on ARM architecture and one based on AMD64. The heterogeneity of the nodes will allow me to run docker images based on different architectures. 
+
+### Why k3s?
+
+The answer is simple. I wanted to avoid virtual machines (Minikube) or to run Kubernetes in Docker (Kind) and I wanted to practice something that came as close as possible to a real production environment. So K3s!
+
+No, I don't really think about using a K8S cluster in the Cloud, the configuration I currently have would cost me a hundred euros for the same hardware. If I had moved to the cloud, the nature of homelab would have been lost 
+
+## Architecture
+
+
+<img src="images-readme/k3s.jpg" alt="Raspberry" width=""/>
+
+## Installing K3s on your node
+
+You can follow the [official documentation](https://rancher.com/docs/k3s/latest/en/quick-start/)
+
+Here are the main commands:
+
+- Install K3s for master node: ```curl -sfL https://get.k3s.io | sh -```
+- Install k3s for worker node: ```curl -sfL https://get.k3s.io | K3S_URL=https://myserver:6443 K3S_TOKEN=mynodetoken sh -``` . Replace **myserver** with your master's IP and **mynodetoken** with token that you will find by throwing ```sudo cat /var/lib/rancher/k3s/server/node-token```
+
+If the previous steps were successful, you should receive this output:
+
+<img src="images-readme/term.jpg" alt="terminal" width="600"/>
 ___
 
 ## 3. Architettura di un Cluster Kubernetes
@@ -360,3 +403,60 @@ Qui le cose cambiano, in quanto ARP fallirà nella risoluzione del segmento di r
 Al fallimento, il bridge manderò il pacchetto alla **default route (quella del root namespace eth0**). A questo punto il pacchetto lascia il nodo ed entra nella rete.
 Assumiamo per il momento che la rete possa ruotare il pacchetto al nodo corretto basandosi sul CIDR block assegnato al nodo. 
 A questo punto il pacchetto entra nel root namespace del **secondo nodo** tramite **eth0**. Finalmente pla rotta viene completata attraverso il corretto **veth** che risiede nel namespace corretto. Una volta raggiunto il nodo, generalmente è il nodo stesso che provvede ad ioltrarlo al pod correto
+
+### 6.2 Pod-to-Service Netwrking
+
+Abbiamo visto come ruotare il traffico tra pod ma l'indirizzo IP dei pod cambia nel tempo in quanto unità effimere e possono apparire e scomparire in base a come scala il cluster. Ogni vola che un pod viene "rischedulato"  a causa di un riavvio o di un crash il suo indirizzo IP cambia senza preavviso. I *Services* in Kubernetes risolvono questo problema.
+
+Un Service in Kubernetes gestisce lo stato di un gruppo di pods, permettendo di tenere traccia di un set di indirizzi IP di pod che cambiano dinamicamente nel tempo. I service funzionano come un'astrazione sui Pods ed è come se assegnassero un indirizzo IP virtuale ad un gruppo di Pod. Tutto il traffico indirizzato all'indirizzo IP virtuale del Service sarà ruotato al set di Pod che sono associati a quell'indirizzo IP virtuale. In questo modo il cambio degli indirizzi IP dei pod non è più un problema perchè chi vuole comunicare con loro non lo farà contattando direttamente i pod ma contatterà il Service, il cui indirizzo IP non cambia nel tempo.
+
+Quando creiamo un Kubernetes Service, un nuovo indirizzo IP virtuale (conosciuto come cluster IP), viene creato per conto nostro. Ovunque nel cluster, il traffico indirizzato all'indirizzo IP sarà **"load-balanced"** al set di Pod che si trovano dietro di esso. Kubernetes crea e mantiene automaticamente un sistema di bilanciamento del carico in-cluster distribuito che distribuisce il traffico ai Pod integri (un pod è integro se le probe che abbiamo configurato hanno successo) associati ad un servizio. 
+
+**Netfilter e iptables**
+
+Per eseguire il load balancing del traffico al'interno del cluster, Kubernetes fa affidamento su framework di erete presente in Linux chiamato **netfilter** che ci permette di fare varie operazioni relative alla rete sotto forma handler personalizzati. Offre varie operazioni e funzioni per il filtraggio dei pacchetti, NAT, port translation che forniscono la funzionalità richiesta per indirizzare i pacchetti attraverso una rete, ma possono anche impedire ai pacchetti di raggiungere determinate posizioni all'interno della rete
+
+**iptables** è invece un firewall di rete che attraverso un sistema basato su tabelle permette di definire, manipolare e trasformare i pacchetti usando il framework netfilter. In Kubernetes le regole iptables sono configurate dal controller **kube proxy** che controlla quali sono le modifiche da fare interrogando l' **api-server**. Quando la modifica ad un Service o Pod aggiorna l'indirizzo IP viertuale del servizio o l'indirizzo IP di un pod, le regole iptables vengono aggiornare per instradare correttamente il traffico diretto a un Service o a un Pod. 
+Le regole iptables controllano il traffico destinato all'IP virtuale di un Service e, in corrispondenza di un match, viene selezionato l'indirizzo IP di un Pod casuale tra quelli che si torvano dietro il Service. A questo punto la regola iptables modifica l'indirizzo IP di destinazione del pacchetto dall'IP virtuale del servizio a quello del Pod selezionato casualmente. Quando i pod cambiano per uno scale del cluster, le regole iptables vengono aggiornate per riflettere lo stato mutevole del cluster.
+
+Sul percorso di ritorno, l'indirizzo IP proviene dal Pod di destinazione. In questo caso iptables riscrive nuovamente l'intestazione IP per sostituire l'IP del pod con l'IP del service in modo che il pod creda di aver comunicato esclusivamente con l'IP del Service per tutto il tempo.
+
+**IPVS (IP Virtual Server)**
+
+Dalla release 1.11 Kubernetes include una seconda opzione per il bilanciamento del carico all'interno del cluster: IPVS. Anche IPVS è costruito su netfilter e implementa il load-balancing a livelo trasporto come parte del Kernel Linux. IPVS è incorporato nel LVS(Linux Virtual Server), dove esegue su un host e si comporta come un load balancer per conto di un cluster di server reali. IPVS può dirigere le richieste  di servizi basate su TCP e UDP ai server reali e fare in modo che i servizi dei server reali appaiano come servizi virtuali su un unico indirizzo IP. Ciò rende IPVS una soluzione natuale per i servizi Kubernetes.
+
+Quando dichiariamo un Service Kubernetes, possiamo specificare se vogliamo che il load balancing venga fatto usando iptables o IPVS.
+IPVS è specificamente progettato per fare load balancing e utilizza strutture dati più efficienti (tabelle hash), consentendo una scalabilità quasi illimitata rispetto a iptables. Quando si crea un Service di tipo load-balancing con IPVS accadono tre cose:
+- Viene creata un'interfaccia IPVS fittizia sul nodo
+- L'indirizzo IP del servizio viene associato all'interfaccia IPVS fittizia
+- vengono creati server IPVS per ciascun indirizzo IP del servizio
+
+Nel futuro IPVS potrebbe diventare il metodo di default per il load-balancing del cluster
+
+### 10 Alias e tool
+
+Per comodità, si potrebbero configurare i seguenti alias per essere più veloci quando si lavora da terminale utilizzando *kubectl*
+```
+alias cl="clear"
+alias k="kubectl"
+alias kg="kubectl get"
+alias k='kubectl'
+```
+
+Ci sono poi i seguenti tool molto comodi quando si lavora con Kubernetes:
+- **k9s** Permette di avere un'interfaccia quasi grafica per poter interagire con il cluster Kubernetes. Ecco il [collegamento](https://github.com/derailed/k9s) alla repo github!
+- **Datree**  Permette di verificare la correttezza dei manifest prima di applicarli in Kubernetes. Fa dei controlli molto utili per verificare che le risorse non solo rispecchino gli schemi di Kubernetes ma anche le best practices vigenti al momento (limitare le risorse del pod, network policies ecc). [Qui](https://hub.datree.io/) trovi tutto quello di cui hai bisogno per instllare e configurare datree
+- **Kubernetes dashboard** Permettono di avere un'interfaccia grafica per interagire con il cluster. Puoi installare utilizzando questo comando
+
+```kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta8/aio/deploy/recommended.yaml```
+
+Per visualizzarle hai bisogno di un token che su k3s può essere recuperato con 
+```sudo k3s kubectl -n kubernetes-dashboard describe secret admin-user-token | grep '^token'```
+Ora tutto quello che resta è lanciare
+```kubectl proxy &``` (& per lanciare il processo in background)
+E a questo link
+ http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/#/login troverai la schermata di login
+
+Inserisci il token e goditi la tua prima dashboard Kubernetes!
+
+<img src="images-readme/Dashboard.jpg" alt="dashboard" width=""/>
