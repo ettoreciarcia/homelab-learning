@@ -83,34 +83,33 @@ Permette anche di caricare le immagini direttamente nel cluster from local
 | Multi Cluster Support | yes  | yes  | no  |
 | Multi Node support  | no  | no  | yes  |
 
-### Short description
+### K3s
 
-I chose to install k3s due to the light weight and its excellent performance on an ARM processor.
-At the beginning my architecture was nothing more than a cluster with a single node, then I added another node.
+Ho scelto di installare k3s per il poco spazio che occupava e perché è particolarmente performante su architetture ARM. L'ideale per esercitarmi su un Raspberry Pi 4.
+All'inizio la mia architettura non era altro che un cluster con un singolo nodo, puoi ho cominciato ad aggiungere i nodi worker al cluster
 
-In the current configuration my cluster has one node based on ARM architecture and one based on AMD64. The heterogeneity of the nodes will allow me to run docker images based on different architectures. 
+I nodi worker sono basati su architetture ADM, questo mi permette di testare immagini basate sia su AMD che su ARM utilizzando le label associate ai nodi
 
-### Why k3s?
+### Perché k3s?
 
-The answer is simple. I wanted to avoid virtual machines (Minikube) or to run Kubernetes in Docker (Kind) and I wanted to practice something that came as close as possible to a real production environment. So K3s!
+La risposta è semplice: volevo evitare le macchine virtuali (Minikube) e o di lanciare Kubernetes in Docker (Kind). Volevo qualcosa che si avvicinasse quanto più possibile ad un reale cluster K8s in produzione e non ad un Vanilla Cluster.
+Ho già utilizzato Kubernetes in ambiente Cloud (EKS) ma questo non mi permetteva di affrontare le maggiori sfide su K8s (Persistenza dei dati in un ambiente on prem, etcd e gestione di tutto ciò che c'è "sotto" un cluster Kubernetes). In più, la configurazione che ho attualmente costerebbe centinaia di dollari al mese se fosse in Cloud.
 
-No, I don't really think about using a K8S cluster in the Cloud, the configuration I currently have would cost me a hundred euros for the same hardware. If I had moved to the cloud, the nature of homelab would have been lost 
-
-## Architecture
+## Architettura
 
 
 <img src="images-readme/k3s.jpg" alt="Raspberry" width=""/>
 
-## Installing K3s on your node
+## Installazione di K3s sul tuo nodo
 
-You can follow the [official documentation](https://rancher.com/docs/k3s/latest/en/quick-start/)
+Puoi seguire la [documentazione offciaile](https://rancher.com/docs/k3s/latest/en/quick-start/)
 
-Here are the main commands:
+Questi i comandi:
 
 - Install K3s for master node: ```curl -sfL https://get.k3s.io | sh -```
 - Install k3s for worker node: ```curl -sfL https://get.k3s.io | K3S_URL=https://myserver:6443 K3S_TOKEN=mynodetoken sh -``` . Replace **myserver** with your master's IP and **mynodetoken** with token that you will find by throwing ```sudo cat /var/lib/rancher/k3s/server/node-token```
 
-If the previous steps were successful, you should receive this output:
+Se gli step precedenti sono andati a buon fine, questo è quello che vedrai
 
 <img src="images-readme/term.jpg" alt="terminal" width="600"/>
 ___
@@ -310,8 +309,8 @@ ___
 ### 5.1 Health Check
 Sono dei controlli periodici che il cluster fa sui pod per verificarne lo stato. Questo controllo viene eseguito dall'agente kubeklet su ogni nodo.
 Abbiamo 3 tipi di health chechk:
-- **Liveness Probe**: viene utilizzato dal cluster per verificare se il container è partito correttamento. Se questo controllo fallisce il container viene marcato come *failed* e ne viene verificata la policy di *restart*
-- **Readiness Probe** Permette di verificare se il nostro applicativo è pronto a servire il traffico. Se è pronto potrà quidni essere inserito nel pool di un service
+- **Liveness Probe**: viene utilizzato dal cluster per verificare se il container è partito correttamente. Se questo controllo fallisce il container viene marcato come *failed* e ne viene verificata la policy di *restart*
+- **Readiness Probe** Permette di verificare se il nostro applicativo è pronto a servire il traffico. Se è pronto potrà quindi essere inserito nel pool di un service
 - **Start up probe** Viene utilizzata nel caso di applicativi molto lenti a partire (Poco utilizzata perché è un anti pattern)
 
 *In che modalità possono essere effettuate queste probe?*
@@ -447,11 +446,9 @@ Ci sono poi i seguenti tool molto comodi quando si lavora con Kubernetes:
 - **k9s** Permette di avere un'interfaccia quasi grafica per poter interagire con il cluster Kubernetes. Ecco il [collegamento](https://github.com/derailed/k9s) alla repo github!
 - **Datree**  Permette di verificare la correttezza dei manifest prima di applicarli in Kubernetes. Fa dei controlli molto utili per verificare che le risorse non solo rispecchino gli schemi di Kubernetes ma anche le best practices vigenti al momento (limitare le risorse del pod, network policies ecc). [Qui](https://hub.datree.io/) trovi tutto quello di cui hai bisogno per instllare e configurare datree
 - **Kubernetes dashboard** Permettono di avere un'interfaccia grafica per interagire con il cluster. Puoi installare utilizzando questo comando
-
 ```kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta8/aio/deploy/recommended.yaml```
 
-Per visualizzarle hai bisogno di un token che su k3s può essere recuperato con 
-```sudo k3s kubectl -n kubernetes-dashboard describe secret admin-user-token | grep '^token'```
+Per visualizzarle hai bisogno di un token che su k3s può essere recuperato con ```sudo k3s kubectl -n kubernetes-dashboard describe secret admin-user-token | grep '^token'```
 Ora tutto quello che resta è lanciare
 ```kubectl proxy &``` (& per lanciare il processo in background)
 E a questo link
