@@ -133,7 +133,7 @@ I fattori presi in considerazioni nell'individuare un nodo a cui assegnare l'ese
 
 - **Controller** sono diversi applicativi che vanno a verificare lo stato del cluster interagendo con l'API server e controllano lo stato del cluster confrontandolo con quello desiderato dall'utente. Nel caso in cui questi due stati non combacino, lo scheduler sarà responsabile di far convergere lo stato del cluster verso quello desiderato dall'utente
 
-- **etcd** è un archivio dati di tipo chiave valore di tipo distribbuito e ridondato. Server a mantenere lo stato del cluster. È in giallo perché non sempre viene deployato all'interno del cluster K8S ma potrebbe essere gestito come un servizio esterno. 
+- **etcd** è un archivio dati di tipo chiave valore di tipo distribuito e ridondato. Serve a mantenere lo stato del cluster. È in giallo perché non sempre viene deployato all'interno del cluster K8S ma potrebbe essere gestito come un servizio esterno. 
 
 I **nodi worker** sono i "muscoli" del cluster e sono i nodi su cui andranno a girare i nostri container schedulati dallo scheduler. Sono composti da: Uno dei componenti fondamentali che caratterizza i worker è **kubelet**: un applicativo che permette ai nostri nodi worker di comunicare con il control plane.
 
