@@ -1,12 +1,20 @@
 # Kubernetes internals
 
-Tutti abbiamo lanciato il comando 
+Chiunque abbiamo seguito un tutorial su Kubernetes ha lanciato il comando
 ```kubectl run nginx-pod --image=nginx:latest```
 
-E abbiamo potuto ammirare soddisfatti il nostro pod in esecuzione all'interno del cluster Kubernetes.
+E ha potuto ammirare soddisfatto il pod in esecuzione all'interno del cluster Kubernetes.
+A questo punti alcuni hanno cambiato la descrizione del profilo Linkedin in "Kubernetes Tech Lead Engineer", altri hanno cominciato ad approfondire questo tool.
 Ma cosa c'è dietro? Quale "magia" si cela dietro K8s affinchè quel pod possa esser "preso in carico" e avviato all'interno del cluster?
 
-In questo articolo daremo una panoramica di quelli che sono gli attori coinvolti, sorvolando per il momento ciò che riguarda il netowrking.
+In questo articolo daremo una panoramica di quelli che sono gli attori coinvolti
+
+Lavoreremo sotto le seguenti ipotesi:
+- Avremo un nodo master e due nodi worker
+- I pod non potranno essere schedulati sul nodo master
+- Etcd sarà interno al cluster
+- Il pod non necessiterà di essere esposto al di fuori del cluster
+- Il pod non avrò bisogno di montare volumi
 
 Saranno coinvolti i seguenti componenti:
 
@@ -18,19 +26,34 @@ Saranno coinvolti i seguenti componenti:
 
 4. **etcd** è un archivio dati di tipo chiave valore distribuito e ridondato. Serve a mantenere lo stato del cluster.
 
-5. **Kubelet** un agente che è eseguito su ogni nodo del cluster. Si assicura che i container siano eseguiti in un pod.
+5. **Kubelet** un agente che è eseguito su ogni nodo del cluster. Si assicura che i container siano eseguiti in un pod e comunica direttamente con l'api-server
 
-6. **kube-proxy** è un proxy eseguito su ogni nodo del cluster, responsabile della gestione dei kubernetes service. I kube proxy mantengono le regole di networking sui nodi, queste regole permettono la comunicazione verso altri nodi del cluster o l'esterno.
+7. **Kubectl** è il principale tool utilizzato per intaragire con il cluster Kubernetes. Lo fa autenticandosi sul control plane e facendo chiamate API di vario tipo.
+
+![Kubernetes Architecture](diagram.png)
+
+Proviamo ora a ripercorrere gli step che ci portano dall'esecuzione del nostro comando fino all'effettivo avvio del container all'interno del cluster
 
 
-[ TODO: CREARE DISEGNO CON TUTTI I COMPONENTI ELENCATI SOPRA]
+##### 1. Lanciamo il comando
 
-[TODO ENTRARE NEL DETTAGLIO DI QUESTI STEP]
+```kubectl run nginx-pod --image=nginx:latest```
 
-1. Lanciamo il comando "kubectl run .. "
-2. Kubectl genera il manifest che descirve il pod
-- Aggiungere autenticazione sull'api Server (?) 
-3. Il manifest viene mandato all'API Server
+##### 2 Kubectl si autentica sul cluster
+##### 3. Kubectl effettua la chiamata API all'API Server
+In questa fase il tool kubectl tradurrà il nostro comando in un'API di Kubernetes. Un concetto fondamentale da capire quando si lavora con Kubernetes è che tutto è un'API.
+Anche quando applichiamo un manifest kubectl lo traduce in una chimata API e contatta l'api server.
+
+Per esempio, supponendo di voler avere una lista di tutti i namespace presenti all'interno del cluster, possiamo lanciare il comando
+```kubectl get namespaces```
+
+o interrogare direttamente l'api-server con la chiamata 
+
+```http://[control-plane-ip]:[PORT]/api/v1/namespaces```
+
+Pri
+
+
 4. L'API server valida il manifest
 5. L'API server aggiorna lo stato di etcd
 6. Un controller viene attivato e si accorge che lo stato presente in etcd non "matcha" con lo stato desidrato dall'utente
