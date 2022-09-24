@@ -15,12 +15,6 @@ Cosa c'è dietro Kubernetes? Quale "magia" ha fatto arrivare quel pod su quel no
 
 In questo articolo daremo una panoramica di quelli che sono gli attori coinvolti affinchè la "magia" funzioni.
 
-Lavoreremo sotto le seguenti ipotesi:
-- Avremo un nodo master e due nodi worker
-- I pod non potranno essere schedulati sul nodo master
-- Etcd sarà interno al cluster
-- Il pod non necessiterà di essere esposto al di fuori del cluster
-- Il pod non avrò bisogno di montare volumi
 
 Saranno coinvolti i seguenti componenti:
 
@@ -38,6 +32,13 @@ Esistono diversi tipi di scheduler, uno per ogni tipo di risorse che possiamo cr
 7. **Kubectl** è il principale tool utilizzato per intaragire con il cluster Kubernetes. Lo fa autenticandosi sul control plane e facendo chiamate API di vario tipo.
 
 ![Kubernetes Architecture](diagram.png)
+
+Andremo a creare le seguenti risorse:
+
+1. **Pods**  Il pod è l'unità atomica di Kubernetes. Possiamo vederlo come una raccolta di uno o più container Linux. Si tratta di un'unità effimera che può essere distrutta e ricreata in base allo stato che viene dichiarato.
+2. **Replica Set** Ha lo scopo di mantenere un set stabile di pod in esecuzione in qualsiasi momento. Viene utilizzato per garantire la disponibilità di un numero specifico di Pod identici.
+3. **Deployment**: oggetto che fornisce aggiornamenti dichiarativi alle applicazioni. Consente di descrivere il ciclo di vita di un'applicazione, ad esempio quali immagini utilizzare per l'app, il numero di pod presenti e il modo in cui devono essere aggiornati.
+
 
 Proviamo ora a ripercorrere gli step che ci portano dall'esecuzione del nostro comando fino all'effettivo avvio del container all'interno del cluster
 
@@ -77,7 +78,7 @@ Scriviamo "Deployment" in etcd
 A questo punto la connessione tra il nostro client e l'api-server termina, abbiamo fatto tutto quello che c'era da fare. Da qui in poi sarà Kubernetes a fare il resto del lavoro
 
 ##### 6. Il Controll Manager entra in gioco
-Il control manager ha una serie di loop (uno per ogni risorsa che è possibile creare nel cluster) e quello adibito al controllo dei deployments nota che lo stato desiderato dall'utente che ha appena aggiunto un deploymemnt non combacia con lo stato attuale del cluster.
+Il control manager ha una serie di loop (uno per ogni risorsa che è possibile creare nel cluster) e quello adibito al controllo dei deployments nota che lo stato desiderato dall'utente che ha appena aggiunto un deployment non combacia con lo stato attuale del cluster.
 In questo caso specifico il control manager dei deployments andrà a creare un risorsa di tipo **Replica Set**.
 Per farlo comunicherà con l'API server e quest'ultimo aggiornerà lo stato di etcd aggiungendo quanto chiesto dal controll manager.
 Lo stato di ectd è stato nuovamente aggiornato e il controller dei Replica Set si accorge che lo stato di ectd non combacia con quello attuale del cluster. Comunciherà quindi all'API server di aggiungere i pod richiesti dal replica set e l'api-server aggiornerà nuovamente lo stato di etcd con i 3 pods.
