@@ -101,9 +101,8 @@ Spero che questa rappresentazione grafica possa aiutarti a rendere più chiaro i
 
 ![gif](overview.gif)
 
-[TO DO INSERIRE GIF CON LE 20 PRESENTAZIONI DI TUTTO IL FLOW]
 
-
+Bonus memino a tema:
 
 ![k8s-meme](k8s-meme.png)
 
