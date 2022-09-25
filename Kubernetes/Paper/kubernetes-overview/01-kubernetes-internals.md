@@ -94,9 +94,16 @@ Quello che lo scheduelr farà sarà cercare di tenere il carico dei nodi bilanci
 
 ##### 8. Kubelet
 Kubelet, agente installato su ogni nodo, sa di dover creare i pod richiesti dallo scheduler. Comunicherà quindi all'api server che i pod stanno per essere creati.
-In realtà il kubelet fa molto più di questo, specialmente per quanto riguarda il networking.
+In realtà il Kubelet fa molto più di questo, specialmente per quanto riguarda il networking. Ma questo lo vedremo nel prossimo articolo :)
 
-Abbiamo già gettato le basi per il prossimo articolo!
+
+Spero che questa rappresentazione grafica possa aiutarti a rendere più chiaro il flusso descritto sopra:
+
+![gif](overview.gif)
+
+[TO DO INSERIRE GIF CON LE 20 PRESENTAZIONI DI TUTTO IL FLOW]
+
+
 
 ![k8s-meme](k8s-meme.png)
 
