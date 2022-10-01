@@ -22,7 +22,7 @@ Saranno coinvolti i seguenti componenti:
 
 2. **Scheduler** Controlla i pod appena creati che non hanno un nodo assegnato e, dopo averlo identificato, lo assegna. I fattori presi in considerazioni nell'individuare un nodo a cui assegnare l'esecuzione di un Pod includono la richiesta di risorse del Pod stesso e degli altri workload presenti nel sistema, i vincoli delle hardware/software/policy, le indicazioni di affinity e di anti-affinity, requisiti relativi alla disponibilità di dati/volumi, le interferenze tra diversi workload e le scadenze
 
-3. **Control Manager** Esegue diversi control loops, uno per ogni tipo di risorsa che è possibile creare all'interno del cluster. So occupa di mantenere allineato lo stato di etcd con quello delle risorse che si trovano all'interno del cluster. Nel caso in cui questi due stati non combacino, lo scheduler sarà responsabile di far convergere lo stato del cluster verso quello desiderato dall'utente.
+3. **Controller Manager** Esegue diversi control loops, uno per ogni tipo di risorsa che è possibile creare all'interno del cluster. So occupa di mantenere allineato lo stato di etcd con quello delle risorse che si trovano all'interno del cluster. Nel caso in cui questi due stati non combacino, lo scheduler sarà responsabile di far convergere lo stato del cluster verso quello desiderato dall'utente.
 
 4. **etcd** è un archivio dati di tipo chiave valore. Serve a mantenere lo stato del cluster.
 
@@ -67,7 +67,7 @@ o interrogare direttamente l'api-server con la chiamata
 Trovi informazioni più dettagliate sulle API messe a disposizione da Kubernetes a questo [link](https://kubernetes.io/docs/concepts/overview/kubernetes-api/)
 
 ##### 4. L'API server valida il manifest
-Dopo esserci autenticati sull'api server quest'ultimo validerà il manifest che gli abbiamo mandato. Superarto il check di conformità si va avanti, altrimenti il client riceverà un messaggio di errore
+Dopo esserci autenticati sull'api server quest'ultimo validerà il manifest che gli abbiamo mandato.  La risorsa che stiamo creando potrebbe essere già presente sul cluster e in questo caso il nostro YAML Guy riceverà un messaggio di errore, diversamente di passa allo step successivo
 
 ##### 5 L'API server aggiorna lo stato di Etcd
 Validato il manifest lo stato desiderato dall'utente viene scritto in etcd e questo mette in moto una serie di componenti all'interno del cluster
@@ -88,15 +88,17 @@ Avete mai visto la scritta "Pending" nello stato quando lanciate un kubectl get 
 
 A questo punto lo scheduler nota che ci sono dei pod con status pending e, in base alle caratteristiche che hanno, li assegnerà a determinati nodi.
 Nel nostro caso sappiamo per certo che quei nodi non potranno essere schedulati sul control plane.
-Quello che lo scheduelr farà sarà cercare di tenere il carico dei nodi bilanciato
+Quello che lo scheduler farà sarà cercare di tenere il carico dei nodi bilanciato
 
 ##### 8. Kubelet
 Una volta che un pod è assegnato ad un nodo, il compito di portarlo in esecuzione passa alla kubelet del nodo al quale è stato assegnato.
 Kubelet, agente installato su ogni nodo, sa di dover creare i pod richiesti dallo scheduler. Comunicherà quindi all'api server che i pod stanno per essere creati.
-In realtà il Kubelet fa molto più di questo, specialmente per quanto riguarda il networking. Ma questo lo vedremo nel prossimo articolo :)
-[TO DO AGGIUNGERE APPRFONDIMENTO KUBELET]
+In realtà la Kubelet fa molto più di questo. Ma questo lo vedremo nei prossimi articoli :)
+
 
 Spero che questa rappresentazione grafica possa aiutarti a rendere più chiaro il flusso descritto sopra:
 
 ![gif](overview.gif)
 
+[TO DO: Approfondire questione autenticazione sul cluster utilizzando kubectl]
+[TO DO: Aggiungere dettaglio di quello che vedremmo all'interno di etcd quando andiamo a creare una nuova risorsa]
