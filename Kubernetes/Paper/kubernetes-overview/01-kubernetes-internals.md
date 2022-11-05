@@ -77,7 +77,7 @@ Scriviamo "Deployment" in etcd
 A questo punto la connessione tra il nostro client e l'api-server termina, abbiamo fatto tutto quello che c'era da fare. Da qui in poi sarà Kubernetes a fare il resto del lavoro
 
 ##### 6. Controller, it's show time!
-Il control manager ha una serie di loop (uno per ogni risorsa che è possibile creare nel cluster) e quello adibito al controllo dei deployments nota che lo stato desiderato dall'utente che ha appena aggiunto un deployment non combacia con lo stato attuale del cluster.
+Il controller manager ha una serie di loop (uno per ogni risorsa che è possibile creare nel cluster) e quello adibito al controllo dei deployments nota che lo stato desiderato dall'utente che ha appena aggiunto un deployment non combacia con lo stato attuale del cluster.
 In questo caso specifico il control manager dei deployments andrà a creare un risorsa di tipo **Replica Set**.
 Per farlo comunicherà con l'API server e quest'ultimo aggiornerà lo stato di etcd aggiungendo quanto chiesto dal controll manager.
 Lo stato di ectd è stato nuovamente aggiornato e il controller dei Replica Set si accorge che lo stato di ectd non combacia con quello attuale del cluster. Comunciherà quindi all'API server di aggiungere i pod richiesti dal replica set e l'api-server aggiornerà nuovamente lo stato di etcd con i 3 pods.
