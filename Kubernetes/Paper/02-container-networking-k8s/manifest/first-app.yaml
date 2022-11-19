@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: first-app
+  name: first-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: first-app
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: first-app
+    spec:
+      containers:
+      - image: hecha00/golang-app:latest
+        name: golang-app
+        resources: {}
+status: {}
