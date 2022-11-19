@@ -56,7 +56,7 @@ Una volta installato golang, assicurati che tutto sia andato a buon fin lanciand
 La nostra applicazione non richiede un layout strutturato, se sei curioso di vedere lo scheletro di un'applicazione "seria", dai un'occhia a [questo repo git](https://github.com/golang-standards/project-layout).
 
 Cominciamo con il creare la cartella:
-```
+```shell
 mkdir golang-app
 cd golang-app
 go mod init golang-app
@@ -73,10 +73,10 @@ Cominciamo con l'ìmportare i package di cui abbiamo bisogno
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	"log"
-	"net/http"
+  "encoding/json"
+  "fmt"
+  "log"
+  "net/http"
   "os"
   "strconv"
   "time"
@@ -231,6 +231,8 @@ Ps: Ricorda di cambiare le porrte se stai utilizzando dei valori custom!
 
 Ma siamo pigri, non vogliamo mica buildare a mano la nostra applicazione ogni volta che effettuiamo un commit! Proviamo ad automatizzare questo task con Jenkins.
 
+![Jenkins](img/jenkins.webp)
+
 **Cos'è Jenkins?**
 Jenkins è un server open source di CI/CD (Continuous Integration, integrazione continua, e Continuous Deployment, implementazione continua) scritto in Java. Si tratta di uno strumento multipiattaforma, infatti include pacchetti per Linux, Mac OS X, Windows, FreeBSD e OpenBSD.
 
@@ -345,7 +347,9 @@ Ora siamo pronti ad utilizzarla sui nostri orchestratori :)
 
 ![Push](img/DockerHub.jpg)
 
-### 4 Build automatiche con GitHub Pipeline
+### 4 Build automatiche con GitHub Actions
+
+![Actions](img/gh-action.png)
 
 Jenkins non è l'unico strumento che ci permette di buildare automaticamente i nostri progetti all'atto del commit su un repository, 
 
@@ -409,3 +413,8 @@ jobs:
 A questo punto, ad ogni commit, una nuova immagine sarà buildata e pushata su Docker Hub!
 
 ![GitHub](img/Github.jpg)
+
+### 5 Conclusioni
+
+Ora abbiamo un'applicazione sul nostro repository.
+Ad ogni commit la nuova versione dell'applicazione sarà resa disponibile tramite un'immagine Docker che builderemo automaticamente grazie alle nostre automazioni :)
