@@ -1,22 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  labels:
-    app: first-app
   name: first-app
+  labels:
+    app: fist-app
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
       app: first-app
-  strategy: {}
   template:
     metadata:
       labels:
         app: first-app
     spec:
       containers:
-      - image: hecha00/golang-app:latest
-        name: golang-app
-        resources: {}
-status: {}
+      - name:  golang-app
+        image: hecha00/golang-app:latest
+        ports:
+        - containerPort: 8080
