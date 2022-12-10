@@ -181,24 +181,26 @@ Per falo avremo bisogno di un **Dockerfile**
 Il nostro Dockerfile sarà strutturato in questo modo:
 
 ```Dockerfile
-FROM golang:1.19.1-alpine
+FROM golang:1.19.1-alpine as build-step
 
 WORKDIR /app
 COPY go.mod ./
 RUN go mod download
-
 COPY *.go ./
+RUN go build -o /app/golang-app
+
+FROM alpine:3.17.0
+WORKDIR /app
+COPY --from=build-step /app/golang-app .
 
 ARG VERSION_NUMBER
 ARG PORT_NUMBER
 
 ENV PORT $PORT_NUMBER
 ENV VERSION $VERSION_NUMBER
-
-RUN go build -o /golang-app
 EXPOSE 8080
 
-CMD [ "/golang-app" ]
+CMD [ "/app/golang-app" ]
 ```
 
 Proviamo ad analizzarlo insieme:
@@ -208,6 +210,7 @@ Proviamo ad analizzarlo insieme:
 - ```COPY go.mod ./``` e ```RUN go mod download``` Stiamo copiando il file che contiene i moduli go che abbiamo utilizzato e successivamente installiamo questi moduli
 - ```COPY main.go ./``` Copiamo il nostro main nella directory corrente
 - ```ARG VERSION_NUMBER``` e ```ARG PORT_NUMBER``` ci servirano per definire le variabili d'ambiente quando andremo a buildare il container. Ti riomando a questa interessante guida che ne spiega l'utilizzo e la differenza con ```ENV PORT $PORT_NUMBER``` ```ENV PORT $PORT_NUMBER```
+- ```COPY --from=build-step /app/golang-app .``` Qui stiamo creando una nuova immagine a partire dalla precedente. una volta creato l'eseguibile non avremo bisogno di tutte le librerie caricate precdentememte. Questo ci permetterà di ridurre drasticamente la dimensione della nostra immagine Dokcer
 - ```RUN go build -o /golang-app``` Il golang, esattamente com il C, è un linguaggio compilato. Questo richiede che sia compilato prima dell'esecuzione. Con questo comando lo stiamo compilando e stiamo nominado l'eseguibile generato **golang-app**
 - ```EXPOSE 8080``` Ha un valore puramente simbolico, serve a mantenere i Dockerfile più leggibili. In questo caso lo utilizziamo per ricordare che la porta di default esposta dal nostro container è la 8080
 - ```CMD [ "/golang-app" ]``` Lo scopo principale di un CMD è fornire i valori predefiniti per un container in esecuzione. Questi valori predefiniti possono includere un eseguibile, oppure possono omettere l'eseguibile, nel qual caso è necessario specificare anche un'istruzione ENTRYPOINT. Nel nostro caso, stiamo passando l'eseguibile al comando CMD
