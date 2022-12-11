@@ -2,7 +2,7 @@
 
 
 
-Credo che capire come funziona Kubernetes sia in gran parte capire come funziona il suo netowrking. Oggi daremo spazio ai Services, un oggetto Kubernetes fondamentale a livello di networking.
+Credo che capire come funziona Kubernetes sia in gran parte capire come funziona il suo netwrking. Oggi daremo spazio ai Services, un oggetto Kubernetes fondamentale a livello di networking.
 
 I pod hanno bisogno di un modo per trovare altri pod all'interno del cluster e no, un semplice indirizzo IP non basta.
 Dobbiamo sempre tenere a mente che quando lavoriamo con i Pod stiamo lavorando con unità effimere, il nostro cluster può scalare il numero di pod verso l'alto o verso il basso, può rimuovere un pod da un nodo e farne il provisioning su un altro nodo.
@@ -13,6 +13,10 @@ Ai pod, come le scale di Hoghwarts, piace cambiare
 
 I **Services** sono la risorsa Kubernetes ched ci permette di creare un singolo e costante punto di accesso ad un gruppo di pod (L'indirizzo IP di un services non cambia nel tempo)
 
+Ma come fa un service a sapere su quali pod ruotare il traffico che lo raggiunge?
+Utilizzando la label **selector** che attaccheremo ai pod.
+
+Normalmente i Service inoltrano il traffico in maniera casuale ai pod 
 
 ## Quale problema risolvono i Services e perché dovremmo utilizzarli?
 
@@ -20,7 +24,7 @@ Nel laboratorio di oggi utilizzremo la famossima immagine di nginx ed ed esporre
 
 Cominciamo! 
 
-(Nell'esperimento utilizzerò il mio homelab con K3s sul mio RaspberrPI, ma qualsiasi distro Kubernetes andrà bene. Se non ne hai ancora installata una, dai un'occhiata a Kind (Kubernetes in Docker) o a Minikube Kubernetes in VM)
+(Nell'esperimento utilizzerò il mio homelab con K3s sul mio RaspberrPI, ma qualsiasi distro Kubernetes andrà bene. Se non ne hai ancora installata una, dai un'occhiata a Kind (Kubernetes in Docker) o a Minikube (Kubernetes in VM))
 
 ```kubectl create deployment nginx-deployment --image=nginx:latest -n testing-lab --dry-run=client -o yaml > deployment.yaml```
 
@@ -92,7 +96,7 @@ Questa volta non indaghiamo troppo il contenuto del manifest, in un atto di fede
 
 Perfetto, ora dovreste trovarvi in questa situazione
 
-[ISNERISCI FOTO DUE NAMESPACE CON DUE POD]
+![pod](img/pod.png)
 
 Grimaldello sarà "Il nostro uomo all'interno", proviamo a conttare il pod di nginx da Grimaldello.
 
@@ -100,7 +104,7 @@ Prendiamo una shell in grimaldello
 
 ```k get pods -n utility```
 
-```k exec -it  [POD_NAME] -n utility -- shgrimaldello-77b4db564-m4rr4```
+```k exec -it  [POD_NAME] -n utility -- sh``
 
 E proviamo a contattare direttamente il pod di nginx utilizzando l'indirizzo IP di quest'ultimo:
 
@@ -127,9 +131,8 @@ Questo però genera un problema: se un set di pod (chiamiamolo backend) fornisce
 
 Abbiamo bisogno quindi di una risorsa che "astragga" i pod e ci dia un punto di accesso non mutabile ai pod presenti dietro di essa. Quella risorsa è rappresentata dai Services.
 
-Esistono diversi tipi di Services, proviamo ad applicarli al nostro pod di nginx per capire in cosa differiscono!
+### Discovering Services through environment variables
 
-Ma prima di farlo diamo un'occhiata alle variabili d'ambiente presenti nel nostro pod di nginx. 
 Come al solito prendiamo la shell all'interno del nostro container e lanciamo un semplice
 ```env```
 
@@ -139,7 +142,23 @@ Qunado un pod è in esecuzione su un nodo, la kubelet aggiunge a quel pod un set
 ```{SVCNAME}_SERVICE_HOST```
 ```{SVCNAME}_SERVICE_PORT```
 
+Ogni volta che un nuovo service viene creato, due variabili d'ambiente saranno aggiunte dalla kubelet all'interno delle env di tutti i container che vengono avvviati
 ![5](img/5.jpg)
+
+## Discovering services through DNS
+
+Tra i pod presenti nel namespace **kube-system** ne abbiamo uno chiamato **kube-dns** a cui sarà associato un Service (anch'esso nel namespace kube-system).
+Come suggerisce il nome, in questo pod è in esecuzione un server DNS che tutti gli altri pod in esecuzione all'interno del cluster utilizzeranno di default.
+
+## Raggiungere i Service mediante FQDN
+
+Nel nostro esempio il pod "Grimaldello" può connettersi al pod di nginx raggungendo il service di nginx e mediante il seguente FQDN;
+
+nginx-svc.services-lab.svc.cluster.local
+
+- **nginx-svc** è il nome del Service associato al pod
+- **services-lab** è il namespace in cui questo Service si trova
+- **svc.cluster.local**  è un suffisso di dominio del cluster configurabile utilizzato in tutti i nomi dei servizi locali del cluster.
 
 #### ClusterIP
 
@@ -164,9 +183,8 @@ Andiamo quindi a creare il service:
 
 ```k create -f clusterIP.yaml```
 
-E vediamo cosa è successo alle env del nostro pod nginx!
+Riavviato il pod di nginx, andiamo a vedere cosa è stato aggiunto all'interno delle sue variabili d'ambiente.
 Sono state aggiunte le due env:
-
 
 ```NGINX_SVC_PORT_80_TCP=tcp://10.43.52.200:80```
 ```NGINX_SVC_PORT=tcp://10.43.52.200:80```
