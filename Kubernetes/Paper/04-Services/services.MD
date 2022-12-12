@@ -20,7 +20,8 @@ Normalmente i Service inoltrano il traffico in maniera casuale ai pod
 
 ## Quale problema risolvono i Services e perché dovremmo utilizzarli?
 
-Nel laboratorio di oggi utilizzremo la famossima immagine di nginx ed ed esporremo il pod su cui quest'applicazione gira con diversi tipi di Services.
+Nel laboratorio di oggi utilizzerox9
+9 la famossima immagine di nginx ed ed esporremo il pod su cui quest'applicazione gira con diversi tipi di Services.
 
 Cominciamo! 
 
@@ -221,6 +222,8 @@ spec:
 
 La definiziione del manifest resta la stessa, eccetto per la sezione ```type``` che in questo caso è di tipo ```NodePort```.
 La porta sarà assegnata in un range casuale (il default è 30000-32767) o in alternativa si può fissarla utilizzando l'attributo ```nodePort```.
+
+![9](img/9.jpg)
 
 Utilizzando questo service saremo quindi in grado di raggiungere il pod contattando direttamente i nodi del cluster. Suponnendo per esempio che l'indirizzo IP di uno dei nodi sia ```192.168.0.2```, e che la porta sia quella che troviamo descrivendo il service appena creato
 ![7](img/7.jpg)
