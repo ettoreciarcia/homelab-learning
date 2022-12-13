@@ -1,0 +1,1 @@
+# Golang appplication automated builds with Jenkins/GH Actions
