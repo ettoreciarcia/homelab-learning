@@ -2,7 +2,7 @@
 
 Utilizzare Kubernetes può essere doloroso, in questo articolo mostreremo alcuni tool e consigli che possono semplificare il lavoro giornaliero dei nostri amici indentatori di YAML!
 
-### Interagire con il cluster
+## Interagire con il cluster
 #### - Kubectl
 
 Kubectl è uno strumento della riga di comando per interagire con un cluster Kubernetes. Con kubectl, puoi eseguire diverse operazioni di gestione dei cluster, come deploy di container, scale di risorse, visualizzazione dello stato dei cluster e altro ancora. kubectl è uno strumento indispensabile per chiunque lavori con Kubernetes.
@@ -26,7 +26,28 @@ Lens è una interfaccia grafica open-source per Kubernetes. Ti permette di gesti
 
 
 ![lens](img/header-lens.png)
-### Gestione dei contesti
+
+## Creazione di Cluster per testing/sviluppo
+
+- **Minikube**: Crea una macchina virtuale come nodo singolo di K8S. Necessita quindi di un Hypervisor. Per chi comincia, questo tool è un must. In pochi minuti si ha il cluster up e si è pronti a lavorare utilizzando kubectl
+
+- **Kind**: anche questo è un progetto Kubernetes ma a differenza di Minikube sposta il nodo all'interno di un container Docker. Questo significa che è sensibilmente più veloce rispetto a Minikube. Kind prevede anche un flag per creare più istanze Docker con Kubernetes in parallelo.
+
+- **K3s**: è una versione più leggera di Kubernetes sviluppata da Rancher Labs. Si divide in K3s Server e Agent.È particolarmente performante su dispositivi ARM
+
+### Minkube VS Kind VS K3S 1
+|   | Minikube  | Kind   | K3s  |
+|---|---|---|---|
+| runtime  | VM  | container   |  native |
+|  supported architectures |  AMD64 |  AMD64 | AMD64, ARMv7, ARM64  |
+| supported container runtime  | Docker,CRI-O,containerd,gvisor  |  Docker |  Docker, containerd |
+|  start up time |  5:19 / 3:15 |  2:48 / 1:06 |   	0:15 / 0:15 |
+| memory Requirements  |  2GB | 8GB (Windows, MacOS)  |  512 MB |
+| Requires root?  |  no  | no  |  yes |
+| Multi Cluster Support | yes  | yes  | no  |
+| Multi Node support  | no  | no  | yes  |
+
+## Gestione dei contesti
 
 Se lavorate con più cluster Kubernetes vi ritroverete a gestire più contesti. 
 Ci sono due approcci:
@@ -46,7 +67,7 @@ Se scegliete questa strada un tool come [kubectx](https://github.com/ahmetb/kube
 
 ![Kubectx](img/kubectx-demo.gif)
 
-### Alias
+## Alias
 
 Per essere più veloci nell'utilizzo di kubectl potete farvi aiutare dagli alias.
 Ecco una lista di alias che può farvi risparmiare un po' di tempo
@@ -73,7 +94,7 @@ Per configurare permantemente gli alias all'interno del vostro sistema potete ag
 - ZSH  ```~/.zshrc```
 
 
-### Troubleshooting
+##Troubleshooting
 #### Kubeshark
 
 Tool molto valido per l'analisi del traffico all'interno dei vostri container.
@@ -88,3 +109,4 @@ Riferimenti a [Kubeshshark](https://kubeshark.co/)
 
 Sì, lo so. È un nome strano per un tool, sembrerebbe trattarsi proprio di un'immagine Docker. Lo è!
 È l'immagine che utilizzo per creare un pod nel cluster! E tipicamente chiamo quel pod "grimaldello", contiene un sacco di utility per fare troubleshooting a livello di rete/container.
+
