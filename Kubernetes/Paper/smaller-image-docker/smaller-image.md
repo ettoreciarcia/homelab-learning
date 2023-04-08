@@ -5,8 +5,8 @@ In queesto articolo vedremo come ridurre la dimensione delle nostre immagini Doc
 Ma perché dovremmo farlo? Dopotutto un'immagine vale l'altra, basta che funzioni!
 In realtà non è così, ci sono una serie di validi motivi per ridurre la dimensione delle immagini Docker:
 
-- Le immagini Dokcer più piccole sono più facili da distribuire e scaricare, questo può essere utile se si utilizza un registry di immagini o si condivide l'immagine con altre persone
-- Le immagini Docker più piccole richiedono meno spazio su disco, i lche può essere utilie se si ha uno spazio di archiviazione limitato
+- Le immagini Docker più piccole sono più facili da distribuire e scaricare, questo può essere utile se si utilizza una registry di immagini o si condivide l'immagine con altre persone
+- Le immagini Docker più piccole richiedono meno spazio su disco, il che può essere utilie se si ha uno spazio di archiviazione limitato
 - Le immagini Docker più piccole si avviano più rapidamente, il che può essere utile se quelle imamgini vengono utilizzate in un ambiente di produzione dove è importante ridurre al minimo i tempi di avvio
 - Le immagini Docker più piccole consumano meno risorse durante l'esecuzione, il che può essere utile se si utilizzano molti container sullo stesso host
 - Immagini più piccole sono più sicure in quanto all'aumentare dei pacchetti e delle dipendenze presenti in un'immagine aumenta il numero di vulnerabilità a cui quel container potrebbe essere esposto.
@@ -41,7 +41,7 @@ FROM ubuntu:22:04
 
 Proviamo a buildare questa immagine e vedere cosa succede!
 
-Creiamo un file chiamato *Dockerfile* che contiene la nostra unica istruzione ```FROM ubuntu:22:04``` e proviamo a creare la nostra prima immagine con il comando
+Creiamo un file chiamato *Dockerfile* che contiene la nostra unica istruzione ```FROM ubuntu:22.04``` e proviamo a creare la nostra prima immagine con il comando
 
 ```shell
 docker build -t epsilon-lab/ubuntu:1.0 . 
@@ -81,7 +81,7 @@ e ci accorgiamo con nostro grande dispiacere che l'editor non è presente all'in
 A questo punto potremmo essere tentati di installare direttamente vim all'interno del nostro container ubuntu, ma questa è una **pessima** pratica.
 I container non hanno persistenza (se non montiamo volumi), quindi una volta riavviato il container tornerebbe in esecuzione ma Vim sarebbe di nuovo assente.
 
-Il nostro container è stato creato a partire da un Dockerfile, se vogliamo che tutti i container reati a partire dalla nostra immagine abbiano al proprio interno Vim come editor di testo dobbiamo lavorare sul Dockerfile.
+Il nostro container è stato creato a partire da un Dockerfile, se vogliamo che tutti i container creati a partire dalla nostra immagine abbiano al proprio interno Vim come editor di testo dobbiamo lavorare sul Dockerfile.
 
 Aggiungiamo quindi la seguente riga al Dockerfile di partenza
 
@@ -215,7 +215,7 @@ Con i layer aggiunti siamo passati da un'immagine di 173MB a una di 919MB.
 Vogliamo davvero portare in produzione un container così pesante?
 Certo che no! Ridurremo presto la dimensione di questa immagine :)
 
-A questo punto il nostro container è pronto a ricevere connessione HTTP, testiamo subito il codice!
+A questo punto il nostro container è pronto a ricevere connessioni HTTP, testiamo subito il codice!
 
 ```shell
 docker run -dit -p 8080:8080 epsilon-lab/ubuntu:5.0
@@ -321,7 +321,7 @@ E buildiamo come al solito la nostra immagine
 
 *gcr.io/distroless/static:nonroot* è il nome di un'immagine Docker basata su Distroless, un progetto di Google che fornisce immagini Docker senza distribuzione di base (come Alpine o Debian). L'immagine "gcr.io/distroless/static:nonroot" è specificamente progettata per eseguire programmi statico-compilati senza l'accesso a una shell o a altre utility di sistema.
 
-L'immagini distroless sono intese ntesa per l'utilizzo in ambienti di produzione dove è importante minimizzare l'attacco surface e ridurre al minimo le dipendenze. Poiché l'immagine non include una shell o altre utility di sistema, è più difficile per gli attaccanti eseguire comandi dannosi o sfruttare vulnerabilità di sicurezza. Tuttavia, l'assenza di queste utility può rendere più difficile il debugging o la risoluzione dei problemi in caso di errori.
+Le immagini distroless sono intese per l'utilizzo in ambienti di produzione dove è importante minimizzare la superficie d'attacco e ridurre al minimo le dipendenze. Poiché l'immagine non include una shell o altre utility di sistema, è più difficile per gli attaccanti eseguire comandi dannosi o sfruttare vulnerabilità di sicurezza. Tuttavia, l'assenza di queste utility può rendere più difficile il debugging o la risoluzione dei problemi in caso di errori.
 
 ### 5 .dockerignore
 
