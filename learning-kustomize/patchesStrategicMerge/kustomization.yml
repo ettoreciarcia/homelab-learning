@@ -1,0 +1,7 @@
+resources:
+- resources/deployment.yaml
+- resources/deployment1.yaml
+patchesStrategicMerge:
+- patches/increase_replicas.yaml
+- patches/set_memory.yaml
+- patches/set_memory_test.yaml
